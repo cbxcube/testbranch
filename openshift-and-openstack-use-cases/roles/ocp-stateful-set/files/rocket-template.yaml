@@ -1,0 +1,252 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: rocketchat
+metadata:
+  name: rocketchat
+  annotations:
+    description: "Rocketchat - A simple showcase for OpenShift Stateful Sets"
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true" 
+    labels:
+      name: mongodb
+    name: ${MONGODB_INTERNAL_SERVICE_NAME}
+  spec:
+    clusterIP: None
+    ports:
+    - name: mongodb
+      port: 27017
+    selector:
+      name: mongodb
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+    labels:
+      name: mongodb
+    name: ${MONGODB_SERVICE_NAME}
+  spec:
+    clusterIP: None
+    ports:
+    - name: mongodb
+      port: 27017
+    selector:
+      name: mongodb
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    name: "mongodb"
+  spec:
+    serviceName: ${MONGODB_INTERNAL_SERVICE_NAME}
+    replicas: ${MONGODB_REPLICAS}
+    selector:
+      matchLabels:
+        name: mongodb
+    template:
+      metadata:
+        labels:
+          name: "mongodb"
+      spec:
+        containers:
+          - name: mongo-container
+            image: "registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest"
+            ports:
+              - containerPort: 27017
+            args:
+              - "run-mongod-replication"
+            resources:
+              limits:
+                memory: ${MONGODB_MEMORY_LIMIT}
+            volumeMounts:
+              - name: mongo-data
+                mountPath: "/var/lib/mongodb/data"
+            env:
+              - name: MONGODB_DATABASE
+                value: ${MONGODB_DATABASE}
+              - name: MONGODB_USER
+                value: ${MONGODB_USER}
+              - name: MONGODB_PASSWORD
+                value: ${MONGODB_PASSWORD}
+              - name: MONGODB_ADMIN_PASSWORD
+                value: ${MONGODB_ADMIN_PASSWORD}
+              - name: MONGODB_REPLICA_NAME
+                value: ${MONGODB_REPLICA_NAME}
+              - name: MONGODB_KEYFILE_VALUE
+                value: ${MONGODB_KEYFILE_VALUE}
+              - name: MONGODB_SERVICE_NAME
+                value: ${MONGODB_SERVICE_NAME}
+            readinessProbe:
+              exec:
+                command:
+                  - stat
+                  - /tmp/initialized
+    volumeClaimTemplates:
+      - metadata:
+          name: mongo-data
+          labels:
+            name: "mongodb"
+        spec:
+          accessModes: [ ReadWriteOnce ]
+          resources:
+            requests:
+              storage: "1Gi"
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: rocketchat
+    name: rocketchat
+  spec:
+    replicas: 1
+    selector:
+      app: rocketchat
+      deploymentconfig: rocketchat
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: rocketchat
+          deploymentconfig: rocketchat
+      spec:
+        containers:
+        - env:
+          - name: MONGO_URL
+            value: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_SERVICE_NAME}:27017/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_NAME}
+          image: docker.io/rocketchat/rocket.chat:latest
+          imagePullPolicy: IfNotPresent
+          name: rocketchat
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/info
+              port: 3000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: ${ROCKET_MEMORY_LIMIT}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /app/uploads
+            name: rocketchat-volume-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: rocketchat-volume-1
+    test: false
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances application pods
+      service.alpha.openshift.io/dependencies: '[{"name": "${MONGODB_SERVICE_NAME}", "kind": "Service"}]'
+    labels:
+      app: rocketchat
+    name: rocketchat
+  spec:
+    ports:
+    - name: 3000-tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: rocketchat
+      deploymentconfig: rocketchat
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: rocketchat
+    name: rocketchat
+  spec:
+    port:
+      targetPort: 3000-tcp
+    to:
+      kind: Service
+      name: rocketchat
+      weight: 100
+    wildcardPolicy: None
+parameters:
+  - description: Maximum amount of memory the frontend container can use
+    displayName: Memory Limit
+    name: ROCKET_MEMORY_LIMIT
+    required: true
+    value: 512Mi
+  - description: The name of the exposed service used for calls from upstream services.
+    displayName: MongoDB Service Name
+    name: MONGODB_SERVICE_NAME
+    value: mongodb
+    required: true
+  - description: The name of the internal service used for replica set communication.
+    displayName: MongoDB Internal Service Name
+    name: MONGODB_INTERNAL_SERVICE_NAME
+    value: mongodb-internal
+    required: true
+  - description: The name of the database
+    displayName: Mongo Database Name
+    name: MONGODB_DATABASE
+    value: mongodb
+    required: true
+  - description: The user for database connectivity
+    displayName: Mongo User
+    name: MONGODB_USER
+    value: mongodb_user
+    required: true 
+  - description: The password for database connectvity
+    displayName: Mongo User Password
+    name: MONGODB_PASSWORD
+    from: '[a-zA-Z0-9]{16}'
+    generate: expression
+  - description: The admin password for Mongo instance
+    displayName: Mongo Admin Password
+    name: MONGODB_ADMIN_PASSWORD
+    from: '[a-zA-Z0-9]{16}'
+    generate: expression
+  - description: Name for the mongo replica set
+    displayName: ReplicaSet Name
+    name: MONGODB_REPLICA_NAME
+    value: rs0
+    required: true
+  - description: Replication keyfile value
+    displayName: Keyfile Value
+    name: MONGODB_KEYFILE_VALUE
+    from: '[a-zA-Z0-9]{16}'
+    generate: expression
+  - description: Size of mongo replicaset
+    displayName: Replica count
+    name: MONGODB_REPLICAS
+    value: '3'
+    required: true
+  - description: Maximum amount of memory the backend container can use
+    displayName: Memory Limit
+    name: MONGODB_MEMORY_LIMIT
+    required: true
+    value: 256Mi

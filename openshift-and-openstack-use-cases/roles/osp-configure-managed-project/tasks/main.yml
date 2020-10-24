@@ -1,0 +1,43 @@
+- name: Check if network exists
+  shell: openstack network show {{ project }}
+  ignore_errors: yes
+  register: openstack_network_show
+
+- name: Create OpenStack Project Network
+  shell: openstack network create {{ project }}
+  register: openstack_network_create
+  when: openstack_network_show.rc != 0
+
+- name: Check if subnet exists
+  shell: openstack subnet show {{ project }}_subnet
+  ignore_errors: yes
+  register: openstack_subnet_show
+
+- name: Create OpenStack Project Subnet
+  shell: openstack subnet create --network {{ project }} --allocation-pool start={{ start_range }},end={{ end_range }} --dns-nameserver {{ dns_server }} --subnet-range {{ cidr }} {{ project }}_subnet
+  when: openstack_subnet_show.rc != 0
+
+- name: Check if security group exists
+  shell: openstack security group show {{ project }}_base
+  register: security_group_show
+  ignore_errors: yes
+
+- name: Create Security Group Base
+  shell: openstack security group create {{ project }}_base --description "Allow base ports"
+  when: security_group_show.rc != 0
+
+- name: Allow 22 Ingress to Base Group
+  shell: openstack security group rule create --protocol TCP --dst-port 22 --remote-ip 0.0.0.0/0 {{ project }}_base
+  when: security_group_show.rc != 0
+
+- name: Allow 80 Ingress to Base Group
+  shell: openstack security group rule create --protocol TCP --dst-port 80 --remote-ip 0.0.0.0/0 {{ project }}_base
+  when: security_group_show.rc != 0
+
+- name: Allow 443 Ingress to Base Group
+  shell: openstack security group rule create --protocol TCP --dst-port 443 --remote-ip 0.0.0.0/0 {{ project }}_base
+  when: security_group_show.rc != 0
+
+- name: Allow ICMP Ingress to Base Group
+  shell: openstack security group rule create --protocol ICMP --remote-ip 0.0.0.0/0 {{ project }}_base
+  when: security_group_show.rc != 0

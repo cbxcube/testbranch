@@ -1,0 +1,5 @@
+- name: Add admin user to project
+  shell: openstack role add --project {{ project }} --user {{ openstack_user }} admin
+
+- name: Delete OpenStack Project
+  shell: openstack project delete {{ project }}

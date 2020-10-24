@@ -1,0 +1,17 @@
+# url - OpenShift API URL
+# token - OpenShift user token, ideally service account
+# project - new project to create
+# role - user role for new project
+# user - user who will access project
+# tier - size of new project, free, small, medium and large
+# label - create label for project association and costs
+# new_project - create a new project true/false.
+
+url: https://openshift.144.76.134.229.xip.io:8443
+token:
+project: test
+role: admin
+user: test
+tier: free
+label: box01
+new_project: True

@@ -1,0 +1,143 @@
+{
+    "description": "",
+    "spec": [
+        {
+            "question_description": "Name of OpenStack Project to Create",
+            "min": 0,
+            "default": "",
+            "max": 1024,
+            "required": true,
+            "choices": "",
+            "new_question": true,
+            "variable": "project",
+            "question_name": "OpenStack Project Name",
+            "type": "text"
+        },
+        {
+            "question_description": "Name of OpenStack User to Create",
+            "min": 0,
+            "default": "",
+            "max": 1024,
+            "required": true,
+            "choices": "",
+            "new_question": true,
+            "variable": "user",
+            "question_name": "OpenStack User Name",
+            "type": "text"
+        },
+        {
+            "question_description": "Password for OpenStack User",
+            "min": 0,
+            "default": "",
+            "max": 32,
+            "required": true,
+            "choices": "",
+            "new_question": true,
+            "variable": "passwd",
+            "question_name": "OpenStack User Password",
+            "type": "password"
+        },
+        {
+            "question_description": "Name of the Role for the User in Project",
+            "min": null,
+            "default": "_member_",
+            "max": null,
+            "required": true,
+            "choices": "_member_\nadmin",
+            "new_question": true,
+            "variable": "role",
+            "question_name": "OpenStack User Role",
+            "type": "multiplechoice"
+        },
+        {
+            "required": true,
+            "min": null,
+            "default": "free",
+            "max": null,
+            "question_description": "Tier for quota: free, small, medium or large",
+            "choices": "free\nsmall\nmedium\nlarge",
+            "variable": "tier",
+            "question_name": "OpenStack Project Tier",
+            "type": "multiplechoice"
+        },
+        {
+            "question_description": "CIDR for new OpenStack Private Network",
+            "min": 0,
+            "default": "192.168.99.0/24",
+            "max": 1024,
+            "required": true,
+            "choices": "",
+            "variable": "cidr",
+            "question_name": "OpenStack Network CIDR",
+            "type": "text"
+        },
+        {
+            "question_description": "First IP in Range for DHCP",
+            "min": 0,
+            "default": "192.168.99.100",
+            "max": 1024,
+            "required": true,
+            "choices": "",
+            "variable": "start_range",
+            "question_name": "OpenStack Private Network Range Starting IP",
+            "type": "text"
+        },
+        {
+            "question_description": "Endine IP for DHCP range",
+            "min": 0,
+            "default": "192.168.99.200",
+            "max": 1024,
+            "required": true,
+            "choices": "",
+            "variable": "end_range",
+            "question_name": "OpenStack Private Network Range Ending IP",
+            "type": "text"
+        },
+        {
+            "question_description": "",
+            "min": 0,
+            "default": "admin",
+            "max": 32,
+            "required": true,
+            "choices": "",
+            "variable": "openstack_user",
+            "question_name": "OpenStack Admin User",
+            "type": "password"
+        },
+        {
+            "required": true,
+            "min": 0,
+            "default": "<password>",
+            "max": 32,
+            "question_description": "",
+            "choices": "",
+            "new_question": true,
+            "variable": "openstack_passwd",
+            "question_name": "OpenStack Admin User Password",
+            "type": "password"
+        },
+        {
+            "question_description": "",
+            "min": 0,
+            "default": "<auth_url>",
+            "max": 32,
+            "required": true,
+            "choices": "",
+            "variable": "openstack_auth_url",
+            "question_name": "OpenStack AUTH URL",
+            "type": "password"
+        },
+        {
+            "question_description": "",
+            "min": 0,
+            "default": "admin",
+            "max": 32,
+            "required": true,
+            "choices": "",
+            "variable": "openstack_project",
+            "question_name": "OpenStack Admin User Tenant",
+            "type": "password"
+        }
+    ],
+    "name": ""
+}

@@ -1,0 +1,14 @@
+- name: Check if server exists
+  shell: openstack server show {{ instance_name }}
+  register: server_show
+  ignore_errors: yes
+
+- name: Delete instance
+  shell: openstack server delete {{ instance_name }}
+  register: delete_instance
+  when: server_show.rc == 0
+
+- name: Check Instance Delete results
+  debug:
+    msg: "Instance {{ instance_name }} deleted successfully"
+  when: delete_instance.rc == 0

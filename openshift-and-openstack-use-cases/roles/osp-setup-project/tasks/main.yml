@@ -1,0 +1,106 @@
+- name: Set facts for free tier
+  set_fact:
+    backup_gigabytes: 1000
+    backups: 10
+    cores: 20
+    floating_ips: 10
+    gigabytes: 1000
+    instances: 10
+    networks: 10
+    ports: 100
+    ram: 16384
+    routers: 10
+    secgroup_rules: 100
+    secgroups: 10
+    snapshots: 10
+    subnets: 20
+    volumes: 10
+  when: tier == "free"
+
+- name: Set facts for small tier
+  set_fact:
+    backup_gigabytes: 3000
+    backups: 30
+    cores: 50
+    floating_ips: 50
+    gigabytes: 3000
+    instances: 50
+    networks: 50
+    ports: 500
+    ram: 122880
+    routers: 25
+    secgroup_rules: 300
+    secgroups: 50
+    snapshots: 30
+    subnets: 50
+    volumes: 50
+  when: tier == "small"
+
+- name: Set facts for medium tier
+  set_fact:
+    backup_gigabytes: 10000
+    backups: 100
+    cores: 120
+    floating_ips: 100
+    gigabytes: 10000
+    instances: 100
+    networks: 100
+    ports: 1000
+    ram: 256000
+    routers: 50
+    secgroup_rules: 500
+    secgroups: 100
+    snapshots: 100
+    subnets: 100
+    volumes: 100
+  when: tier == "medium"
+
+- name: Set facts for large tier
+  set_fact:
+    backup_gigabytes: 25000
+    backups: 500
+    cores: 250
+    floating_ips: 250
+    gigabytes: 25000
+    instances: 250
+    networks: 200
+    ports: 2000
+    ram: 524288
+    routers: 100
+    secgroup_rules: 1000
+    secgroups: 200
+    snapshots: 300
+    subnets: 200
+    volumes: 250
+  when: tier == "large"
+
+- name: Check if OpenStack project exists
+  shell: openstack project show {{ project }}
+  ignore_errors: yes
+  register: openstack_project_show_output
+
+- name: Create OpenStack Project
+  shell: openstack project create --parent admin {{ project }}
+  register: openstack_project_output
+  when: openstack_project_show_output.rc != 0
+
+- name: Check if User exists
+  shell: openstack user show {{ user }}
+  ignore_errors: yes
+  register: openstack_user_show_output
+
+- name: Add OpenStack User
+  shell:  openstack user create --project {{ project }} --password {{ passwd }} {{ user }}
+  when: (openstack_user_show_output.rc != 0 and openstack_project_show_output.rc != 0 and openstack_project_output.rc == 0)
+
+- name: Add Role to User
+  shell: openstack role add --project {{ project }} --user {{ user }} {{ role }}
+  when: (openstack_project_show_output.rc != 0 and openstack_project_output.rc == 0)
+
+- name: Add Admin User to Project
+  shell: openstack role add --project {{ project }} --user admin admin
+  when: (openstack_project_show_output.rc != 0 and openstack_project_output.rc == 0)
+
+- name: Add Quota to Project
+  shell: openstack quota set --backup-gigabytes {{ backup_gigabytes }} --backups {{ backups }} --cores {{ cores }} --floating-ips {{ floating_ips }} --gigabytes {{ gigabytes }} --instances {{ instances }} --networks {{ networks }} --ports {{ ports }} --ram {{ ram }} --routers {{ routers }} --secgroup-rules {{ secgroup_rules }} --secgroups {{ secgroups }} --snapshots {{ snapshots }} --subnets {{ subnets }} --volumes {{ volumes }} {{ project }}
+  when: (openstack_project_show_output.rc != 0 and openstack_project_output.rc == 0)

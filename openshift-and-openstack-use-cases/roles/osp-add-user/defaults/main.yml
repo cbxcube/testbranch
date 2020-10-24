@@ -1,0 +1,7 @@
+# instance_user - user to create in instance
+# user_public_key - public ssh key of user
+# allow_sudo - Create a user that can sudo True or False
+
+instance_user: <user>
+user_public_key: <public key>
+allow_sudo: True

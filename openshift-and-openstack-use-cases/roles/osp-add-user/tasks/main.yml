@@ -1,0 +1,29 @@
+- name: "Create user accounts and add users to groups"
+  user:
+    name: "{{ instance_user }}"
+
+- name: Create ssh directory
+  file:
+    path: "/home/{{ instance_user }}/.ssh"
+    state: directory
+    owner: "{{ instance_user }}"
+
+- name: create empty authorized_keys file
+  file:
+    path: "/home/{{ instance_user }}/.ssh/authorized_keys"
+    state: touch
+    owner: "{{ instance_user }}"
+    mode: 0600
+
+- name: Add public key to authorized keys file
+  lineinfile:
+    path: "/home/{{ instance_user }}/.ssh/authorized_keys"
+    line: "{{ user_public_key }}"
+
+- name: Allow managed user sudo
+  lineinfile:
+    dest: "/etc/sudoers.d/{{ instance_user }}"
+    line: "{{ instance_user }} ALL=(ALL) NOPASSWD: ALL" 
+    create: yes 
+    state: present
+  when: allow_sudo == "True"

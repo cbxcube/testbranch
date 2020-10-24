@@ -1,0 +1,16 @@
+- name: Check if router exists
+  shell: openstack router show {{ project }}_router
+  ignore_errors: yes
+  register: router_show
+
+- name: Create a new router
+  shell: openstack router create {{ project }}_router
+  when: router_show.rc != 0
+
+- name: Add Project Network to Router
+  shell: openstack router add subnet {{ project }}_router {{ project }}_subnet
+  when: router_show.rc != 0
+
+- name: Add Public Network as Gateway in Router
+  shell: openstack router set --external-gateway {{ public_network }} {{ project }}_router
+  when: router_show.rc != 0

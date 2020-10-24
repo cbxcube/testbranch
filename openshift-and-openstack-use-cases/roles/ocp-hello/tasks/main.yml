@@ -1,0 +1,50 @@
+---
+- name: login to openshift
+  shell: "{{ openshift_cli }} login {{ openshift_url }} -u {{ openshift_user }} -p {{ openshift_password }} --insecure-skip-tls-verify=true"
+
+- name: check if project {{ project_name }} exists
+  shell: "{{ openshift_cli }} get project {{ project_name }}"
+  register: project_result
+  ignore_errors: true
+  changed_when: false
+
+- name: create project {{ project_name }}
+  shell: "{{ openshift_cli }} new-project {{ project_name }} --display-name='{{ project_display_name }}' --description='{{ project_desc }}'"
+  when: project_result|failed
+
+- name: check if service exists
+  shell: "{{ openshift_cli }} get service {{ service_name }} -n {{ project_name }}"
+  register: install
+  ignore_errors: true
+  changed_when: false
+
+- name: remove existing install if clean deployment requested
+  shell: |
+    {{ openshift_cli }} delete all -l app={{ service_name }} -n {{ project_name }}
+  when:
+    - install|succeeded
+    - clean_deploy|bool
+
+- name: deploy app
+  shell: |
+    {{ openshift_cli }} new-app -f {{ role_path }}/files/hello-template.yml \
+        --param=SERVICE_NAME={{ service_name }} \
+        --param=GREETING={{ greeting }} \
+        --param=WHO={{ who }} \
+        --param=REPLICAS={{ replicas }} \
+        --param=MEMORY_LIMIT={{ memory_limit }} \
+        -n {{ project_name }}
+  when: clean_deploy|bool or install|failed
+
+- name: get application url
+  shell: |
+    {{ openshift_cli }} get route {{ service_name }} -o jsonpath='{.spec.host}' -n {{ project_name }}
+  register: application_url
+
+- name: wait for application to become ready
+  uri:
+    url: http://{{ application_url.stdout }}
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60

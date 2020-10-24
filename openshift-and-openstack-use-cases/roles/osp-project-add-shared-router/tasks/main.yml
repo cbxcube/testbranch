@@ -1,0 +1,13 @@
+- name: Check if router exists
+  shell: openstack router show {{ shared_router }}
+  ignore_errors: yes
+  register: router_show
+
+- name: Check if subnet already attached to shared router
+  shell: openstack port list --router {{ shared_router }} --network {{ project }}
+  ignore_errors: yes
+  register: port_show
+
+- name: Add admin network for tenant access
+  shell: openstack router add subnet {{ shared_router }} {{ project }}_subnet
+  when: (router_show.rc == 0 and port_show.stdout == "")

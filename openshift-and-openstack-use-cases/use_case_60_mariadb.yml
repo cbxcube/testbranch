@@ -1,0 +1,27 @@
+---
+- name: Setup MariaDB on RHEL
+  hosts: '{{ target }}'
+  become: true
+  gather_facts: yes
+  remote_user: "{{ ssh_user }}"
+
+  vars:
+    mariadb_bind_address: '0.0.0.0'
+    mariadb_root_password: '{{ root_passwd }}'
+    mariadb_databases:
+      - name: "{{ app_db_name }}"
+#        init_script: "{{ init_script }}"
+    mariadb_users:
+      - name: "{{ app_user }}"
+        password: '{{ app_user_passwd }}'
+        priv: "myappdb.*:ALL,GRANT"
+        host: "%"
+    mariadb_custom_cnf:
+      mysqld:
+        general-log:
+        general-log-file: queries.log
+        log-output: file
+
+  tasks:
+  - import_role:
+      name: bertvv.mariadb

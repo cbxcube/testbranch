@@ -1,0 +1,18 @@
+      openshift_cli: oc
+      clean_deploy: false
+      project_name: rocket
+      project_display_name: Rocket-Chat
+      project_desc: A Showcase for StatefulSets on OpenShift
+
+      mongodb_service_name: mongodb
+      mongodb_internal_service_name: mongodb-internal
+      mongodb_database: mongodb
+      mongodb_user: mongodb_user
+      mongodb_password: redhat
+      mongodb_admin_password: redhat
+      mongodb_replica_name: rs0
+      mongodb_keyfile_value: 12345678901234567890
+      mongodb_replicas: 3
+
+      mongodb_memory_limit: 256Mi
+      rocket_memory_limit: 512Mi

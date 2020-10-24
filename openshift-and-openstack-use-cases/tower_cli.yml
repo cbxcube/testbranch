@@ -1,0 +1,9 @@
+---
+- name: Setup Ansible Tower CLI
+  hosts: all
+  become: true
+
+  tasks:
+  - import_role:
+      name: tower-cli-setup
+

@@ -1,0 +1,2 @@
+- name: Add floating ip
+  shell: openstack server add floating ip {{ instance_name }} {{ instance_floating_ip }}

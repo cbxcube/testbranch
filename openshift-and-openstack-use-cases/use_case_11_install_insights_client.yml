@@ -1,0 +1,9 @@
+---
+- name: Install Insights Client
+  hosts: all
+  become: true
+
+  tasks:
+    - import_role:
+        name: install-insights-client
+

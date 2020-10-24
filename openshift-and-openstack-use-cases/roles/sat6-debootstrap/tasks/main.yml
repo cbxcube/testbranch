@@ -1,0 +1,10 @@
+- name: Unsubscribe client to Satellite Server
+  shell: subscription-manager unregister
+  register: unregister_output  
+  ignore_errors: True
+
+- name: Remove Satellite CA Certificate
+  yum:
+    name: katello-ca-consumer-sat6.novalocal
+    state: removed
+  when: unregister_output.rc == 0

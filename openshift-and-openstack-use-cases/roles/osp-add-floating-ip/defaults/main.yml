@@ -1,0 +1,5 @@
+# instance_name - name of instance to create
+# instance_floating_ip - FLoating ip address to assign instance (must exist)
+
+instance_name: rhel123
+instance_floating_ip: '144.76.130.233'

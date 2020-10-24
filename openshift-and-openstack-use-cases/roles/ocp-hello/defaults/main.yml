@@ -1,0 +1,12 @@
+      openshift_cli: oc
+      clean_deploy: false
+      project_name: hello
+      project_display_name: Hello World
+      project_desc: A simple Showcase for stateless Apps on OpenShift
+
+      memory_limit: 64Mi
+      service_name: hello
+      greeting: hello
+      who: world
+      replicas: '1'
+

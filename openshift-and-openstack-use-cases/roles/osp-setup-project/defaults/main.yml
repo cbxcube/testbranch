@@ -1,0 +1,11 @@
+# project - name of new project
+# role - role user should have in project
+# user - name of user to create OR name of existing user
+# passwd - user passwd, new user will be setup with this passwd, if existing user is chosen passwd must match
+# tier - free, small, medium or large
+
+project: test
+role: _member_
+user: test
+passwd: redhat
+tier: free

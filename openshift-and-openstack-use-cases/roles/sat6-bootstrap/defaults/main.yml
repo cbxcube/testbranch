@@ -1,0 +1,21 @@
+# master_hostname - sateliite master short hostname
+# satellite_domain_name - satellite domain name
+# org - satellite organization
+# satellite_ip - satellite ip address
+# activation_key - satellite activation key for new hosts
+# puppet_environment - puppet environment to use for hosts in satellite
+# install_puppet - ture/false will install puppet agent 
+# yum_update - true/false perform yum update
+# puppet_logdir - puppet agent logdir
+# puppet_ssldir - puppet agent ssldir
+
+master_hostname: sat6-master
+satellite_domain_name: novalocal
+org: RedHat
+satellite_ip: 144.76.134.226
+activation_key: rhel7-base
+puppet_environment: KT_RedHat_unstaged_rhel7_base_3
+install_puppet: True
+yum_update: True
+puppet_logdir: /var/log/puppet
+puppet_ssldir: /var/lib/puppet/ssl

@@ -1,0 +1,11 @@
+# satellite_ip - satellite ip
+# instance_name - instance name 
+# instance_network - instance internal network
+# ssh_user - ssh user
+# debug - debug true/false
+
+satellite_ip: 144.76.134.227
+instance_name: rhel123
+instance_network: mgmt
+ssh_user: cloud-user
+debug: True

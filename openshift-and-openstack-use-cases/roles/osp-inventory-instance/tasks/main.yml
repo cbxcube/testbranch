@@ -1,0 +1,41 @@
+- name: Check if instance exists
+  shell:  openstack server show {{ instance_name }}
+  register: instance_output
+  ignore_errors: true
+
+- name: Get instance IP
+  shell: openstack server show {{ instance_name }} |grep addresses |awk '{print $4'} |sed 's/{{ instance_network }}=//' |sed 's/,//'
+  register: ip_output
+  when: instance_output.rc == 0
+
+- debug:
+    msg: "Instance ip {{ ip_output.stdout }}"
+  when: (debug and instance_output.rc == 0)
+
+- name: Add the instance to the inventory
+  add_host:
+    name: "{{ instance_name }}"
+    groups: all,instance
+    ansible_user: "{{ ssh_user }}"
+    ansible_ssh_host: "{{ ip_output.stdout }}"
+  when: instance_output.rc == 0
+
+- name: Add the master to the inventory
+  add_host:
+    name: "{{ satellite_ip }}"
+    groups: all,master
+    ansible_user: "{{ ssh_user }}"
+    ansible_ssh_host: "{{ satellite_ip }}"
+  when: instance_output.rc == 0
+
+- name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
+  wait_for:
+    port: 22
+    host: '{{ (ip_output.stdout|default(ansible_host))|default(inventory_hostname) }}'
+    search_regex: OpenSSH
+    delay: 10
+  when: instance_output.rc == 0
+
+- debug:
+    var: groups
+  when: (debug and instance_output.rc == 0)

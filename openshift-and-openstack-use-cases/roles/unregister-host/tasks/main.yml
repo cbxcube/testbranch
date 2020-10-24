@@ -1,0 +1,12 @@
+- name: check if host is already unregistered
+  command: subscription-manager status
+  register: subs_result
+  failed_when: false
+  changed_when: "'Unknown' not in subs_result.stdout"
+
+- name: Unregister hosts
+  command: subscription-manager unregister
+  retries: 5
+  delay: 5
+  when: subs_result.changed
+

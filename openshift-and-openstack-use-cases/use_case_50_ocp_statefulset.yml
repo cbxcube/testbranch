@@ -1,0 +1,12 @@
+- name: Deploy a StatefulSet on OpenShift
+  hosts: localhost
+  gather_facts: false
+  run_once: true
+
+  tasks:
+  - import_role:
+      name: ocp-stateful-set
+    vars:
+      openshift_cli: "oc"
+      clean_deploy: "false"
+      project_name: "rocket"

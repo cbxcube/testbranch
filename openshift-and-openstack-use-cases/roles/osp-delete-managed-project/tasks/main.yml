@@ -1,0 +1,41 @@
+- name: Check if router exists
+  shell: openstack router show {{ shared_router }}
+  ignore_errors: yes
+  register: router_show
+
+- name: Check if subnet already attached to shared router
+  shell: openstack port list --router {{ shared_router }} --network {{ project }}
+  ignore_errors: yes
+  register: port_show
+
+- name: Remove admin network for tenant access
+  shell: openstack router remove subnet {{ shared_router }} {{ project }}_subnet
+  when: (router_show.rc == 0 and port_show.rc == 0)
+
+- name: Check if subnet exists
+  shell: openstack subnet show {{ project }}_subnet
+  ignore_errors: yes
+  register: openstack_subnet_show
+
+- name: Delete OpenStack Project Subnet
+  shell: openstack subnet delete {{ project }}_subnet
+  when: openstack_subnet_show.rc == 0
+
+- name: Check if network exists
+  shell: openstack network show {{ project }}
+  ignore_errors: yes
+  register: openstack_network_show
+
+- name: Delete OpenStack Project Network
+  shell: openstack network delete {{ project }}
+  when: openstack_network_show.rc == 0
+
+- name: Check if security group exists
+  shell: openstack security group show {{ project }}_base
+  register: security_group_show
+  ignore_errors: yes
+
+- name: Delete Security Group Base
+  shell: openstack security group delete {{ project }}_base
+  when: security_group_show.rc == 0
+

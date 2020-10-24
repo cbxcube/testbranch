@@ -1,0 +1,24 @@
+- name: Enable OpenStack Client Repo for RHEL
+  command: "subscription-manager repos --enable={{openstack_tools_repo}}"
+  retries: 5
+  delay: 5
+
+- name: Install OpenStack client packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python3-openstackclient
+    #- python-heatclient 
+
+- name: Setup Keystone Auth File
+  template:
+    src: templates/keystonerc_admin.j2
+    dest: ~/keystonerc_admin
+    owner: root
+    group: root
+    mode: 0755
+
+- debug:
+    msg: "To authenticate to OpenStack 'source ~/keystonerc_admin'"
+

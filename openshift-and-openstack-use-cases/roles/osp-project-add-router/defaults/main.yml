@@ -1,0 +1,9 @@
+# project - name of new project
+# public_network - Public Floating IP Network
+# use_shared_router - True/False use shared router
+# shared_router - Name of shared router
+
+project: test
+public_network: public
+use_shared_router: True
+shared_router: my-router

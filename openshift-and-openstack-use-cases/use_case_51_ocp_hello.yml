@@ -1,0 +1,8 @@
+- name: Deploy a simple Hello World on OpenShift
+  hosts: localhost
+  gather_facts: false
+  run_once: true
+
+  tasks:
+  - import_role:
+      name: ocp-hello

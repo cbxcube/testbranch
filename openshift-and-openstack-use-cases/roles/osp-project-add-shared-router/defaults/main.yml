@@ -1,0 +1,5 @@
+# project - name of new project
+# shared_router - Name of shared router
+
+project: test
+shared_router: my-router
