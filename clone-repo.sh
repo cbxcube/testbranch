@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # 
-# This will merge stagint branch to master branch
+# This will clone repo to local
 #
 
-git switch staging
-git pull
-git add .
-git commit -m "commit before staging>master merge"
-git push
-git checkout master
-git merge staging
-git push
+repo_url=$1
+
+repo_name=echo "${repo_url##*/}"|cut -d '.' -f1
+
+git clone $repo_url
+cd $repo_name
+git status
